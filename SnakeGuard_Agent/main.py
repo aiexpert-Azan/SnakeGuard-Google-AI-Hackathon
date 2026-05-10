@@ -1,8 +1,8 @@
+import asyncio
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import uvicorn
-from pydantic import BaseModel
-from typing import Dict, Any, List
 
+# FIXED: Import directly as local modules since we run uvicorn inside SnakeGuard_Agent folder
 from agent import SnakeGuardAgent
 from logger import agent_logger
 
@@ -12,6 +12,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Initialize the agent
 agent = SnakeGuardAgent()
 
 @app.get("/")
@@ -20,6 +21,7 @@ def read_root():
 
 @app.post("/analyze")
 async def analyze_image(file: UploadFile = File(...)):
+    # Validate file type
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image.")
     
@@ -29,8 +31,9 @@ async def analyze_image(file: UploadFile = File(...)):
         content = await file.read()
         mime_type = file.content_type
         
-        # Run the agent loop
-        result = agent.run_loop(image_bytes=content, mime_type=mime_type)
+        # FIXED: Run the synchronous agent loop in a separate thread 
+        # to prevent blocking the asynchronous FastAPI event loop
+        result = await asyncio.to_thread(agent.run_loop, image_bytes=content, mime_type=mime_type)
         
         return result
     
