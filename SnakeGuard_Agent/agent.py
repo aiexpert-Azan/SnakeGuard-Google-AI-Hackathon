@@ -93,7 +93,7 @@ class SnakeGuardAgent:
         if plan_result.get("tool_needed") and plan_result.get("danger_level") == "Critical":
             add_log("ACT", "Danger level is Critical. Triggering emergency hospital search tool.")
             try:
-                tool_results = search_hospital()
+                tool_results = search_hospital(lat=31.5204, lon=74.3587)
                 add_log("ACT_RESULT", "Tool execution successful.", data=tool_results)
             except Exception as e:
                 add_log("ERROR", f"Tool execution failed: {str(e)}")
