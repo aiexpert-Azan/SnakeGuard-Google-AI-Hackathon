@@ -7,7 +7,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 
 from logger import agent_logger
-from tools import search_hospital
+from tools import search_hospital, generate_pdf
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
@@ -108,6 +108,13 @@ class SnakeGuardAgent:
             "analysis": plan_result,
             "emergency_info": tool_results if tool_results else "None required."
         }
+        pdf_path = generate_pdf(
+            species=plan_result.get("species", "Unknown"),
+            danger_level=plan_result.get("danger_level", "Unknown"),
+            reasoning=plan_result.get("reasoning", ""),
+            emergency_info=tool_results if tool_results else {}
+        )
+        add_log("PDF", "Emergency Action Plan generated.", data={"pdf_path": pdf_path})
         
         add_log("DONE", "Agent loop complete.")
 
