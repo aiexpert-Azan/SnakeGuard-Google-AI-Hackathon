@@ -1,8 +1,8 @@
 import os
 import json
-from pathlib import Path  # FIXED: Missing import added
+from pathlib import Path  
 from google import genai
-from google.genai import types  # FIXED: Added for strictly typed parts and configs
+from google.genai import types
 from typing import Dict, Any
 from dotenv import load_dotenv
 load_dotenv()
@@ -13,7 +13,7 @@ from tools import search_hospital, generate_pdf
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-# FIXED: Correct way to initialize the new Gemini Client
+
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     client = genai.Client(api_key=api_key)
@@ -23,9 +23,9 @@ else:
 
 class SnakeGuardAgent:
     def __init__(self):
-        # FIXED: Store client and model name
+        
         self.client = client
-        self.model_name = 'gemini-3-flash-preview' # Ensure this model name is active in your project
+        self.model_name = 'gemini-3-flash-preview'
         agent_logger.info(f"Initialized SnakeGuardAgent with {self.model_name}.")
 
     def run_loop(self, image_bytes: bytes, mime_type: str) -> Dict[str, Any]:
@@ -64,7 +64,7 @@ class SnakeGuardAgent:
         """
 
         try:
-            # FIXED: Updated generation call using the new SDK syntax
+            
             response = self.client.models.generate_content(
                 model=self.model_name,
                 contents=[
@@ -72,12 +72,12 @@ class SnakeGuardAgent:
                     types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
                 ],
                 config=types.GenerateContentConfig(
-                    response_mime_type="application/json", # Forces strictly JSON output
-                    temperature=0.2 # Lower temperature for analytical consistency
+                    response_mime_type="application/json", 
+                    temperature=0.2 
                 )
             )
             
-            # FIXED: Removed manual string stripping since output is guaranteed JSON
+            
             plan_result = json.loads(response.text)
             add_log("PLAN_RESULT", "Successfully generated plan.", data=plan_result)
             
@@ -90,7 +90,7 @@ class SnakeGuardAgent:
 
         # ----- ACT -----
         tool_results = None
-        # Safely checking if tool is needed and danger is critical
+        
         if plan_result.get("tool_needed") and plan_result.get("danger_level") == "Critical":
             add_log("ACT", "Danger level is Critical. Triggering emergency hospital search tool.")
             try:

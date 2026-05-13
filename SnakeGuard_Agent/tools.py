@@ -5,7 +5,6 @@ from fpdf import FPDF
 from pathlib import Path
 from datetime import datetime
 
-
 # ─────────────────────────────────────────
 # TOOL 1: Hospital Finder
 # ─────────────────────────────────────────
