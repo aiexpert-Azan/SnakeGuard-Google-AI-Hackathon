@@ -5,6 +5,7 @@ from google import genai
 from google.genai import types  # FIXED: Added for strictly typed parts and configs
 from typing import Dict, Any
 from dotenv import load_dotenv
+load_dotenv()
 
 from logger import agent_logger
 from tools import search_hospital, generate_pdf

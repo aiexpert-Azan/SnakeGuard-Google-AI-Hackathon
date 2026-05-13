@@ -21,25 +21,38 @@ def read_root():
 
 @app.post("/analyze")
 async def analyze_image(file: UploadFile = File(...)):
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image.")
-    
+
+    # FIX ADDED HERE
+    if file.content_type is None or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Uploaded file is not an image")
+
     agent_logger.info(f"Received request to analyze image: {file.filename}")
-    
+
     try:
         content = await file.read()
         mime_type = file.content_type
-        result = await asyncio.to_thread(agent.run_loop, image_bytes=content, mime_type=mime_type)
+
+        result = await asyncio.to_thread(
+            agent.run_loop,
+            image_bytes=content,
+            mime_type=mime_type
+        )
+
         return result
-    
+
     except Exception as e:
         agent_logger.error(f"Error processing image: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error during analysis.")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 @app.get("/download-pdf")
 def download_pdf(pdf_path: str):
+
     if not os.path.exists(pdf_path):
         raise HTTPException(status_code=404, detail="PDF not found.")
+
     return FileResponse(
         path=pdf_path,
         media_type="application/pdf",
@@ -47,4 +60,9 @@ def download_pdf(pdf_path: str):
     )
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
