@@ -1,9 +1,11 @@
 import time
 import httpx
+import json
 from typing import Dict, Any, List
 from fpdf import FPDF
 from pathlib import Path
 from datetime import datetime
+from google.genai import types
 
 # ─────────────────────────────────────────
 # TOOL 1: Hospital Finder
@@ -69,7 +71,52 @@ def search_hospital(lat: float = 31.5204, lon: float = 74.3587) -> Dict[str, Any
 
 
 # ─────────────────────────────────────────
-# TOOL 2: PDF Generator
+# TOOL 2: Treatment Instructions
+# ─────────────────────────────────────────
+def fetch_treatment_instructions(species: str, client: Any, is_venomous: bool) -> Dict[str, Any]:
+    """Tool: Fetch specific first-aid instructions based on WHO/Wikipedia guidelines using Gemini."""
+    try:
+        prompt = f"""
+        You are an expert medical AI retrieving WHO and Wikipedia guidelines.
+        The user has been bitten by a {species}, which is {'venomous' if is_venomous else 'non-venomous'}.
+        Provide exactly 4 to 5 actionable first-aid steps to treat this specific snake bite.
+        Respond ONLY with a JSON object in the following format:
+        {{
+            "instructions": [
+                "Step 1...",
+                "Step 2...",
+                "Step 3...",
+                "Step 4...",
+                "Step 5..."
+            ]
+        }}
+        """
+        response = client.models.generate_content(
+            model='gemini-3-flash-preview',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json", 
+                temperature=0.2
+            )
+        )
+        data = json.loads(response.text)
+        instructions = data.get("instructions", [])
+        if not instructions:
+            raise ValueError("No instructions returned")
+        return {"status": "success", "instructions": instructions}
+    except Exception as e:
+        # Fallback instructions
+        fallback = [
+            "Stay calm and ensure safety.",
+            "Immobilize the bitten area.",
+            "Clean the wound gently.",
+            "Seek medical attention immediately." if is_venomous else "Observe for infection.",
+            "Do NOT apply a tourniquet or attempt to suck out venom."
+        ]
+        return {"status": "error", "error": str(e), "instructions": fallback}
+
+# ─────────────────────────────────────────
+# TOOL 3: PDF Generator
 # ─────────────────────────────────────────
 def generate_pdf(
     species: str,
@@ -158,20 +205,27 @@ def generate_pdf(
     pdf.set_font("Helvetica", "B", 13)
     pdf.cell(0, 9, " First Aid Instructions", fill=True, ln=True)
 
-    first_aid_steps = [
-        "Stay calm - panic increases venom absorption.",
-        "Immobilize the bitten limb - keep it below heart level.",
-        "Remove rings, watches, tight clothing near the bite.",
-        "Do NOT cut the wound or try to suck out venom.",
-        "Do NOT apply tourniquet or ice.",
-        "Note the time of the bite immediately.",
-        "Rush to the nearest hospital for antivenom treatment.",
-        "Call emergency services: 115 (Rescue Pakistan)",
-    ]
+    first_aid_steps = []
+    if isinstance(emergency_info, dict) and "instructions" in emergency_info:
+        first_aid_steps = emergency_info.get("instructions", [])
+
+    if not first_aid_steps:
+        first_aid_steps = [
+            "Stay calm - panic increases venom absorption.",
+            "Immobilize the bitten limb - keep it below heart level.",
+            "Remove rings, watches, tight clothing near the bite.",
+            "Do NOT cut the wound or try to suck out venom.",
+            "Do NOT apply tourniquet or ice.",
+            "Note the time of the bite immediately.",
+            "Rush to the nearest hospital for antivenom treatment.",
+            "Call emergency services: 115 (Rescue Pakistan)",
+        ]
+
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(*DKGRAY)
     for i, step in enumerate(first_aid_steps, 1):
-        pdf.cell(0, 7, f"  {i}. {step}", ln=True)
+        pdf.multi_cell(0, 7, f"  {i}. {step}")
+        pdf.ln(1)
     pdf.ln(2)
 
     # ── Hospitals ──

@@ -8,11 +8,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from logger import agent_logger
-from tools import search_hospital, generate_pdf
+from tools import search_hospital, generate_pdf, fetch_treatment_instructions
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(dotenv_path=BASE_DIR / ".env")
-
 
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
@@ -23,7 +22,6 @@ else:
 
 class SnakeGuardAgent:
     def __init__(self):
-        
         self.client = client
         self.model_name = 'gemini-3-flash-preview'
         agent_logger.info(f"Initialized SnakeGuardAgent with {self.model_name}.")
@@ -89,18 +87,30 @@ class SnakeGuardAgent:
             return {"status": "error", "message": "Failed to analyze image", "logs": logs}
 
         # ----- ACT -----
-        tool_results = None
+        tool_results = {}
+        species = plan_result.get("species", "Unknown Snake")
+        danger_level = plan_result.get("danger_level", "None")
+        is_venomous = danger_level in ["Critical", "High", "Moderate"]
         
-        if plan_result.get("tool_needed") and plan_result.get("danger_level") == "Critical":
-            add_log("ACT", "Danger level is Critical. Triggering emergency hospital search tool.")
-            try:
-                tool_results = search_hospital(lat=31.5204, lon=74.3587)
-                add_log("ACT_RESULT", "Tool execution successful.", data=tool_results)
-            except Exception as e:
-                add_log("ERROR", f"Tool execution failed: {str(e)}")
-                tool_results = {"error": str(e)}
+        add_log("ACT", f"Fetching specific treatment instructions for {species}.")
+        instructions_res = fetch_treatment_instructions(species, self.client, is_venomous)
+        if instructions_res.get("status") == "success":
+            tool_results["instructions"] = instructions_res.get("instructions")
         else:
-            add_log("ACT", "No tool execution required based on assessment.")
+            add_log("ERROR", f"Failed to fetch instructions: {instructions_res.get('error')}")
+            tool_results["instructions"] = instructions_res.get("instructions") # fallback
+
+        if plan_result.get("tool_needed") and is_venomous:
+            add_log("ACT", "Danger level requires medical attention. Triggering emergency hospital search tool.")
+            try:
+                hospital_results = search_hospital(lat=31.5204, lon=74.3587)
+                add_log("ACT_RESULT", "Hospital search tool execution successful.", data=hospital_results)
+                tool_results["hospitals"] = hospital_results.get("hospitals", [])
+            except Exception as e:
+                add_log("ERROR", f"Hospital search failed: {str(e)}")
+                tool_results["hospitals_error"] = str(e)
+        else:
+            add_log("ACT", "No emergency hospital search required for non-venomous snake.")
 
         # ----- OBSERVE -----
         add_log("OBSERVE", "Compiling final assessment based on plan and tool results.")
