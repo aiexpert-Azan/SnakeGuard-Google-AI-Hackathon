@@ -84,8 +84,8 @@ class ApiService {
       AgentTrace().log('WARNING', 'Injecting premium fallback Gemini info for "Indian Cobra (Naja naja)".');
       return GeminiInfo(
         species: 'Indian Cobra (Naja naja)',
-        dangerLevel: 'Critical',
-        description: 'Indian Cobra (Naja naja) - Highly Venomous. Neurotoxic venom. Requires immediate Anti-venom treatment.',
+        dangerLevel: 'CRITICAL - Highly Venomous',
+        description: 'Neurotoxic venom profile. Causes muscle paralysis and respiratory failure. Requires immediate anti-venom administration.',
         instructions: [
           'Keep the patient calm and restrict movement to slow down venom spread.',
           'Keep the bitten limb positioned at or below the heart level.',
@@ -97,7 +97,31 @@ class ApiService {
   }
 
   Future<List<Hospital>> fetchNearbyHospitals(double lat, double lng) async {
-    AgentTrace().log('ACT', 'Loading hardcoded local anti-venom hospitals in Lahore...');
+    AgentTrace().log('ACT', 'Fetching nearby hospitals via /nearby_hospitals...');
+    final uri = Uri.parse('$baseUrl/nearby_hospitals?latitude=$lat&longitude=$lng');
+
+    try {
+      AgentTrace().log('API_REQUEST', 'GET to /nearby_hospitals?latitude=$lat&longitude=$lng');
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        AgentTrace().log('API_RESPONSE', 'Response 200 from /nearby_hospitals: ${response.body}');
+        final List<dynamic> list = jsonDecode(response.body);
+        final hospitals = list.map((e) => Hospital.fromJson(e as Map<String, dynamic>)).toList();
+        AgentTrace().log('OBSERVE', 'Successfully loaded ${hospitals.length} nearby hospitals');
+        return hospitals;
+      } else {
+        AgentTrace().log('ERROR', 'Failed to fetch hospitals. Status: ${response.statusCode}');
+        return _getFallbackHospitals();
+      }
+    } catch (e) {
+      AgentTrace().log('ERROR', 'Exception in /nearby_hospitals: $e');
+      AgentTrace().log('WARNING', 'Injecting hardcoded local anti-venom hospitals fallback.');
+      return _getFallbackHospitals();
+    }
+  }
+
+  List<Hospital> _getFallbackHospitals() {
     return [
       Hospital(
         name: "Mayo Hospital Lahore",
