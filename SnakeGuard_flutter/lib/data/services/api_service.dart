@@ -49,7 +49,7 @@ class ApiService {
   Future<String> predictSnakeType(File imageFile) async {
     try {
       final result = await analyzeSnake(XFile(imageFile.path));
-      return result.species;
+      return result.species ?? 'Indian Cobra (Naja naja)';
     } catch (e) {
       return "Indian Cobra (Naja naja)";
     }
@@ -58,9 +58,9 @@ class ApiService {
   Future<GeminiInfo> getGeminiSnakeInfo(String name) async {
     if (_cachedResult != null) {
       return GeminiInfo(
-        species: _cachedResult!.species,
-        dangerLevel: _cachedResult!.dangerLevel,
-        description: _cachedResult!.reasoning,
+        species: _cachedResult!.species ?? '',
+        dangerLevel: _cachedResult!.dangerLevel ?? '',
+        description: _cachedResult!.reasoning ?? '',
         instructions: [
           'Keep the patient calm and restrict movement to slow down venom spread.',
           'Keep the bitten limb positioned at or below the heart level.',
@@ -83,8 +83,8 @@ class ApiService {
   }
 
   Future<List<Hospital>> fetchNearbyHospitals(double lat, double lng) async {
-    if (_cachedResult != null && _cachedResult!.hospitals.isNotEmpty) {
-      return _cachedResult!.hospitals;
+    if (_cachedResult != null && _cachedResult!.hospitals != null && _cachedResult!.hospitals!.isNotEmpty) {
+      return _cachedResult!.hospitals!;
     }
     return [
       Hospital(name: "Services Hospital Lahore", mapsLink: "https://www.google.com/maps?q=31.5497,74.3236", antiVenomAvailable: true),

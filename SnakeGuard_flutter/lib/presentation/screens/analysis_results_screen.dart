@@ -81,7 +81,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dangerColor = _getDangerColor(widget.scanResult.dangerLevel);
+    final dangerColor = _getDangerColor(widget.scanResult.dangerLevel ?? 'None');
 
     return Scaffold(
       appBar: AppBar(
@@ -133,7 +133,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                               ],
                             ),
                             child: Text(
-                              widget.scanResult.dangerLevel.toUpperCase(),
+                              (widget.scanResult.dangerLevel ?? 'None').toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -154,7 +154,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  widget.scanResult.species,
+                                  widget.scanResult.species ?? 'Unknown',
                                   style: Theme.of(context).textTheme.headlineLarge,
                                 ),
                               ),
@@ -176,7 +176,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            widget.scanResult.description,
+                            widget.scanResult.reasoning ?? '',
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],
@@ -200,7 +200,7 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
                 ],
               ).animate().fade(delay: 200.ms),
               const SizedBox(height: 16),
-              ...widget.scanResult.hospitals.asMap().entries.map((entry) {
+              ...(widget.scanResult.hospitals ?? []).asMap().entries.map((entry) {
                 return HospitalCard(hospital: entry.value)
                     .animate()
                     .fade(delay: (300 + (entry.key * 100)).ms)
@@ -227,7 +227,13 @@ class _AnalysisResultsScreenState extends State<AnalysisResultsScreen> {
               const SizedBox(height: 32),
 
               // Agent Trace Logs Section
-              NeonTerminal(logs: widget.scanResult.traceLogs)
+              NeonTerminal(
+                logs: (widget.scanResult.logs ?? [])
+                    .map((e) => e is TraceLog
+                        ? e
+                        : TraceLog.fromJson(Map<String, dynamic>.from(e as Map)))
+                    .toList(),
+              )
                   .animate()
                   .fade(delay: 800.ms)
                   .slideY(begin: 0.2, end: 0),

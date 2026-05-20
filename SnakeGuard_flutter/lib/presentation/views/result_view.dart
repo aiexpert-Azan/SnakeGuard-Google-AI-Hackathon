@@ -138,9 +138,8 @@ class _ResultViewState extends State<ResultView> {
       final scanResult = ScanResult(
         species: _species,
         dangerLevel: _dangerLevel,
-        description: _description,
         hospitals: _hospitals,
-        traceLogs: _trace.logs,
+        logs: _trace.logs,
         pdfPath: _pdfPath,
       );
       final String url = await _apiService.downloadPdfReport(scanResult);
