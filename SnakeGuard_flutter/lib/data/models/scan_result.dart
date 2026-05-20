@@ -1,3 +1,4 @@
+import 'hospital.dart';
 export 'hospital.dart';
 
 class ScanResult {
