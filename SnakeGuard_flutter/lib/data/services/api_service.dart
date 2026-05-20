@@ -2,15 +2,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/scan_result.dart';
 
 class ApiService {
-  final String baseUrl = "http://10.0.2.2:8000";
+  final String baseUrl = "https://snakeguard-google-ai-hackathon.onrender.com";
 
   Future<ScanResult> analyzeSnake(XFile image) async {
     final uri = Uri.parse('$baseUrl/analyze');
@@ -75,24 +73,6 @@ class ApiService {
     final encodedPath = Uri.encodeComponent(result.pdfPath ?? '');
     final url = '$baseUrl/download-pdf?pdf_path=$encodedPath';
     debugPrint('PDF download URL: $url');
-    if (kIsWeb) {
-      try {
-        final response = await http.get(Uri.parse(url));
-        if (response.statusCode == 200) {
-          final pdfBytes = response.bodyBytes;
-          final blob = html.Blob([pdfBytes], 'application/pdf');
-          final objectUrl = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: objectUrl)
-            ..setAttribute('download', 'emergency_report.pdf')
-            ..click();
-          html.Url.revokeObjectUrl(objectUrl);
-        } else {
-          debugPrint('Failed to download PDF: ${response.statusCode}');
-        }
-      } catch (e) {
-        debugPrint('Error downloading PDF: $e');
-      }
-    }
     return url;
   }
 }

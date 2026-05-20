@@ -132,5 +132,6 @@ class SnakeGuardAgent:
         return {
             "status": "success",
             "assessment": final_assessment,
-            "logs": logs
+            "logs": logs,
+            "pdf_path": pdf_path
         }
