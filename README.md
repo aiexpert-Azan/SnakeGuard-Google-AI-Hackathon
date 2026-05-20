@@ -1,35 +1,56 @@
 🐍 SnakeGuard Agent
-📁 Project Structure
-SnakeGuard_Agent/
-frontend/
-main.py
-agent.py
-tools.py
-logger.py
-⚙️ How to Run
-1️⃣ Install Requirements
-pip install -r requirements.txt
-2️⃣ Run Backend
-cd SnakeGuard_Agent
-uvicorn main:app --reload
-3️⃣ Run Frontend
-cd frontend
-streamlit run app.py
-🔑 Environment Variables
+# 🚀 AI Hackathon Project 
 
-Create a .env file:
+## 👥 Team Members
+- MUHAMMAD AZAN
+- MUHAMMAD AAMISH
+- FARAH HAMIDA KHAN
+- SIDRA MUNIR
 
-GEMINI_API_KEY=your_api_key_here
-📸 System Flow
-Upload snake image
-AI identifies snake species
-System checks danger level
-If critical → hospitals + emergency instructions
-Generates PDF report
-🏥 Emergency Features
-Real-time hospital suggestions
-Google Maps links
-Anti-venom availability info
-👨‍💻 Developer
+---
 
-Built by AI Hackathon Team
+## 📱 Project Overview
+
+This is a Flutter-based mobile application developed for the AI Hackathon.  
+The purpose of this project is to demonstrate how Artificial Intelligence can be integrated into a mobile application to automate tasks, improve user experience, and provide smart responses.
+
+Our application focuses on simplicity, usability, and AI-driven functionality.
+
+---
+
+## 💡 Problem Statement
+
+Many users struggle with manual processes and time-consuming tasks.  
+Our goal is to reduce manual effort by introducing an AI-powered solution that can assist users intelligently and efficiently.
+
+---
+
+## ⚙️ Features
+
+- 🔹 User-friendly Flutter interface  
+- 🔹 AI-powered logic integration  
+- 🔹 Fast and responsive UI  
+- 🔹 Cross-platform support (Android / Web)  
+- 🔹 Real-time output generation  
+- 🔹 Simple and clean design  
+
+---
+
+## 🧠 AI Integration
+
+The core of this project is AI-based automation.  
+The system processes user input and generates intelligent outputs automatically, reducing manual effort and improving efficiency.
+
+---
+
+## 🏗️ Tech Stack
+
+- Flutter (Frontend)
+- Dart Programming Language
+- AI/Logic Integration
+- Android Studio / VS Code
+
+---
+
+## 📂 Project Structure
+
