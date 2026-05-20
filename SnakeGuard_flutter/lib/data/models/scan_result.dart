@@ -1,4 +1,4 @@
-import 'hospital.dart';
+import 'package:snakeguard_flutter/data/models/hospital.dart';
 export 'hospital.dart';
 
 class ScanResult {
