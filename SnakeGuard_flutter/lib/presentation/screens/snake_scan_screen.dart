@@ -8,6 +8,7 @@ import '../widgets/primary_button.dart';
 import '../widgets/glass_card.dart';
 import '../../data/services/api_service.dart';
 import 'analysis_results_screen.dart';
+import '../views/result_view.dart';
 
 class SnakeScanScreen extends StatefulWidget {
   const SnakeScanScreen({super.key});
@@ -34,36 +35,18 @@ class _SnakeScanScreenState extends State<SnakeScanScreen> {
     }
   }
 
-  Future<void> _analyzeSnake() async {
+  void _analyzeSnake() {
     if (_imageFile == null) return;
-
-    setState(() {
-      _isAnalyzing = true;
-    });
-
-    try {
-      final result = await _apiService.analyzeSnake(_imageFile!);
-      if (!mounted) return;
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AnalysisResultsScreen(
-            scanResult: result,
-            imagePath: _imageFile!.path,
-            imageBytes: imageBytes!,
-          ),
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultView(
+          imagePath: _imageFile!.path,
+          imageBytes: imageBytes ?? Uint8List(0),
         ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Analysis failed: $e')),
-      );
-      setState(() {
-        _isAnalyzing = false;
-      });
-    }
+      ),
+    );
   }
 
   @override

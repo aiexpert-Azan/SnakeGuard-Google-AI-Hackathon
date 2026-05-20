@@ -1,3 +1,5 @@
+export 'hospital.dart';
+
 class ScanResult {
   final String species;
   final String dangerLevel;
@@ -29,30 +31,6 @@ class ScanResult {
               .toList() ??
           [],
       pdfPath: json['pdf_path'] ?? '',
-    );
-  }
-}
-
-class Hospital {
-  final String name;
-  final String address;
-  final String mapsUrl;
-  final double distanceKm;
-
-  Hospital({
-    required this.name,
-    required this.address,
-    required this.mapsUrl,
-    this.distanceKm = 2.5,
-  });
-
-  factory Hospital.fromJson(Map<String, dynamic> json) {
-    return Hospital(
-      name: json['name'] ?? '',
-      address: json['address'] ?? '',
-      // backend may return maps_link or maps_url
-      mapsUrl: json['maps_link'] ?? json['maps_url'] ?? '',
-      distanceKm: (json['distance_km'] as num?)?.toDouble() ?? 2.5,
     );
   }
 }

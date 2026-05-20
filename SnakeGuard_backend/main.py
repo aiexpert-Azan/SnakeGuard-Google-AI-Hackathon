@@ -70,6 +70,72 @@ def download_pdf(pdf_path: str):
         filename="SnakeGuard_Emergency_Plan.pdf"
     )
 
+from fastapi import Query
+from tools import search_hospital, fetch_treatment_instructions
+
+@app.get("/gemini_info")
+async def gemini_info(snake_name: str = Query(...)):
+    """Fetches Gemini instructions and info for a specific snake."""
+    agent_logger.info(f"Received request for gemini_info: {snake_name}")
+    try:
+        is_venomous = True
+        res = fetch_treatment_instructions(snake_name, agent.client, is_venomous)
+        
+        prompt = f"""
+        Provide a brief description (2-3 sentences) of the snake species: {snake_name} and its danger level.
+        Return ONLY a JSON with:
+        {{
+            "danger_level": "None, Low, Moderate, High, or Critical",
+            "description": "2-3 sentences about the snake"
+        }}
+        """
+        desc = f"The {snake_name} is a snake species that requires immediate attention if a bite is suspected."
+        danger_level = "High"
+        
+        if agent.client:
+            try:
+                response = agent.client.models.generate_content(
+                    model='gemini-3-flash-preview',
+                    contents=prompt,
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
+                import json as pyjson
+                data = pyjson.loads(response.text)
+                danger_level = data.get("danger_level", "High")
+                desc = data.get("description", desc)
+            except Exception as e:
+                agent_logger.error(f"Failed to generate description from LLM: {e}")
+                
+        return {
+            "species": snake_name,
+            "danger_level": danger_level,
+            "description": desc,
+            "instructions": res.get("instructions", [])
+        }
+    except Exception as e:
+        agent_logger.error(f"Error in /gemini_info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/nearby_hospitals")
+async def nearby_hospitals(latitude: float = Query(...), longitude: float = Query(...)):
+    """Fetches nearby hospitals for given coordinates."""
+    agent_logger.info(f"Received request for nearby_hospitals: {latitude}, {longitude}")
+    try:
+        res = search_hospital(lat=latitude, lon=longitude)
+        hospitals = res.get("hospitals", [])
+        formatted_hospitals = []
+        for i, h in enumerate(hospitals):
+            formatted_hospitals.append({
+                "name": h.get("name", f"Hospital {i+1}"),
+                "address": h.get("address", f"Emergency Road near {latitude}, {longitude}"),
+                "maps_link": h.get("maps_link", "https://maps.google.com"),
+                "distance_km": 1.2 + i * 0.4
+            })
+        return formatted_hospitals
+    except Exception as e:
+        agent_logger.error(f"Error in /nearby_hospitals: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
