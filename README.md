@@ -11,7 +11,7 @@
 
 ## 📱 Project Overview
 
-This is a Flutter-based mobile application developed for the AI Hackathon.  
+This is a Flutter-based mobile application developed for the Google AiSeekho Hackathon.  
 The purpose of this project is to demonstrate how Artificial Intelligence can be integrated into a mobile application to automate tasks, improve user experience, and provide smart responses.
 
 Our application focuses on simplicity, usability, and AI-driven functionality.
