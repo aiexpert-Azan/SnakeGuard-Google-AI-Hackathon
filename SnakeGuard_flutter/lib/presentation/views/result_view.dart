@@ -390,7 +390,7 @@ class _ResultViewState extends State<ResultView> {
                         },
                         borderRadius: BorderRadius.circular(16),
                         child: HospitalCard(
-                          hospital: ScanResultHospitalAdapter(h),
+                          hospital: h,
                         ),
                       ).animate().fade(delay: (idx * 100).ms).slideX(begin: 0.1, end: 0);
                     }),
@@ -424,30 +424,3 @@ class _ResultViewState extends State<ResultView> {
   }
 }
 
-// Quick adapter to convert data models Hospital to UI widgets Hospital adapter
-class ScanResultHospitalAdapter implements Hospital {
-  @override
-  final String name;
-  @override
-  final String address;
-  @override
-  final String mapsUrl;
-  @override
-  final String distance;
-
-  ScanResultHospitalAdapter(Hospital coreHospital)
-      : name = coreHospital.name,
-        address = coreHospital.address,
-        mapsUrl = coreHospital.mapsUrl,
-        distance = coreHospital.distance;
-
-  @override
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'address': address,
-      'maps_url': mapsUrl,
-      'distance': distance,
-    };
-  }
-}
