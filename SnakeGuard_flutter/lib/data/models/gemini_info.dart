@@ -1,5 +1,3 @@
-import 'gemini_info.g.dart';
-
 class GeminiInfo {
   final String species;
   final String dangerLevel;
@@ -13,7 +11,24 @@ class GeminiInfo {
     required this.instructions,
   });
 
-  factory GeminiInfo.fromJson(Map<String, dynamic> json) => _$GeminiInfoFromJson(json);
+  factory GeminiInfo.fromJson(Map<String, dynamic> json) {
+    return GeminiInfo(
+      species: json['species'] as String? ?? '',
+      dangerLevel: json['danger_level'] as String? ?? json['danger'] as String? ?? '',
+      description: (json['description'] as String?) ?? (json['reasoning'] as String?) ?? '',
+      instructions: (json['instructions'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$GeminiInfoToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'species': species,
+      'danger_level': dangerLevel,
+      'description': description,
+      'instructions': instructions,
+    };
+  }
 }

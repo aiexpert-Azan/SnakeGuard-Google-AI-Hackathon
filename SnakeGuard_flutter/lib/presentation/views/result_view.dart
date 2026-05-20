@@ -382,8 +382,17 @@ class _ResultViewState extends State<ResultView> {
                     ..._hospitals.asMap().entries.map((entry) {
                       final idx = entry.key;
                       final h = entry.value;
-                      return HospitalCard(
-                        hospital: ScanResultHospitalAdapter(h),
+                      return InkWell(
+                        onTap: () async {
+                          final Uri url = Uri.parse(h.mapsUrl);
+                          if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                            debugPrint('Could not launch $url');
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: HospitalCard(
+                          hospital: ScanResultHospitalAdapter(h),
+                        ),
                       ).animate().fade(delay: (idx * 100).ms).slideX(begin: 0.1, end: 0);
                     }),
                   ],
@@ -425,21 +434,21 @@ class ScanResultHospitalAdapter implements Hospital {
   @override
   final String mapsUrl;
   @override
-  final double distanceKm;
+  final String distance;
 
   ScanResultHospitalAdapter(Hospital coreHospital)
       : name = coreHospital.name,
         address = coreHospital.address,
         mapsUrl = coreHospital.mapsUrl,
-        distanceKm = coreHospital.distanceKm;
+        distance = coreHospital.distance;
 
   @override
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'address': address,
-      'maps_link': mapsUrl,
-      'distance_km': distanceKm,
+      'maps_url': mapsUrl,
+      'distance': distance,
     };
   }
 }

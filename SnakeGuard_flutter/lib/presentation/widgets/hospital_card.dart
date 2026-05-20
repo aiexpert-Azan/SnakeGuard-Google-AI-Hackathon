@@ -50,7 +50,7 @@ class HospitalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${hospital.distanceKm} km away',
+                    '${hospital.distance} away',
                     style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.w600,
