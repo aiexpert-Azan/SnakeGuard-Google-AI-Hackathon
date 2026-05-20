@@ -2,7 +2,7 @@
 # 🚀 AI Hackathon Project 
 
 ## 👥 Team Members
-- MUHAMMAD AZAN
+- MUHAMMAD AZAN E HAQ
 - MUHAMMAD AAMISH
 - FARAH HAMIDA KHAN
 - SIDRA MUNIR
