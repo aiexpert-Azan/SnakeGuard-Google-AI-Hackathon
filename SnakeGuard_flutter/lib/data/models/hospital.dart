@@ -1,31 +1,31 @@
 class Hospital {
   final String name;
-  final String address;
-  final String distance;
-  final String mapsUrl;
+  final String mapsLink;
+  final bool antiVenomAvailable;
 
   Hospital({
     required this.name,
-    required this.address,
-    required this.distance,
-    required this.mapsUrl,
+    required this.mapsLink,
+    required this.antiVenomAvailable,
   });
+
+  String get mapsUrl => mapsLink;
+  String get address => antiVenomAvailable ? "Anti-venom Available" : "Emergency Care Unit";
+  String get distance => "Nearby";
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
     return Hospital(
       name: json['name'] as String? ?? '',
-      address: json['address'] as String? ?? '',
-      distance: json['distance'] as String? ?? (json['distance_km'] != null ? '${json['distance_km']} km' : '2.5 km'),
-      mapsUrl: json['maps_url'] as String? ?? json['maps_link'] as String? ?? '',
+      mapsLink: json['maps_link'] as String? ?? json['maps_url'] as String? ?? '',
+      antiVenomAvailable: json['anti_venom_available'] as bool? ?? json['anti_venom'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'address': address,
-      'distance': distance,
-      'maps_url': mapsUrl,
+      'maps_link': mapsLink,
+      'anti_venom_available': antiVenomAvailable,
     };
   }
 }

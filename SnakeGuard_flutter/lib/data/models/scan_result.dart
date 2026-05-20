@@ -4,34 +4,50 @@ export 'hospital.dart';
 class ScanResult {
   final String species;
   final String dangerLevel;
-  final String description;
+  final String reasoning;
   final List<Hospital> hospitals;
   final List<TraceLog> traceLogs;
   final String? pdfPath;
 
+  String get description => reasoning;
+
   ScanResult({
     required this.species,
     required this.dangerLevel,
-    required this.description,
+    required this.reasoning,
     required this.hospitals,
     required this.traceLogs,
     this.pdfPath,
   });
 
   factory ScanResult.fromJson(Map<String, dynamic> json) {
+    final assessment = json['assessment'] as Map<String, dynamic>?;
+    final analysis = assessment?['analysis'] as Map<String, dynamic>?;
+    final emergencyInfo = assessment?['emergency_info'] as Map<String, dynamic>?;
+    final hospitalsList = emergencyInfo?['hospitals'] as List?;
+
+    List<Hospital> parsedHospitals = [];
+    if (hospitalsList != null && hospitalsList.isNotEmpty) {
+      parsedHospitals = hospitalsList.map((e) => Hospital.fromJson(e as Map<String, dynamic>)).toList();
+    } else {
+      parsedHospitals = [
+        Hospital(name: "Services Hospital Lahore", mapsLink: "https://www.google.com/maps?q=31.5497,74.3236", antiVenomAvailable: true),
+        Hospital(name: "Mayo Hospital Lahore", mapsLink: "https://www.google.com/maps?q=31.5744,74.3142", antiVenomAvailable: true),
+        Hospital(name: "Jinnah Hospital Lahore", mapsLink: "https://www.google.com/maps?q=31.4697,74.2728", antiVenomAvailable: true),
+      ];
+    }
+
+    final rawLogs = json['logs'] as List?;
+
     return ScanResult(
-      species: json['species'] as String? ?? json['snakeName'] as String? ?? '',
-      dangerLevel: json['danger_level'] as String? ?? json['dangerLevel'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      hospitals: (json['hospitals'] as List?)
-              ?.map((e) => Hospital.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      traceLogs: (json['trace_logs'] as List?)
-              ?.map((e) => TraceLog.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      pdfPath: json['pdf_path'] as String? ?? json['pdfPath'] as String? ?? '',
+      species: analysis?['species'] as String? ?? json['species'] as String? ?? 'Unknown',
+      dangerLevel: analysis?['danger_level'] as String? ?? json['danger_level'] as String? ?? 'None',
+      reasoning: analysis?['reasoning'] as String? ?? json['reasoning'] as String? ?? '',
+      pdfPath: json['pdf_path'] as String? ?? '',
+      traceLogs: rawLogs != null
+          ? rawLogs.map((e) => TraceLog.fromJson(e as Map<String, dynamic>)).toList()
+          : [],
+      hospitals: parsedHospitals,
     );
   }
 
@@ -40,6 +56,7 @@ class ScanResult {
       'species': species,
       'danger_level': dangerLevel,
       'dangerLevel': dangerLevel,
+      'reasoning': reasoning,
       'description': description,
       'hospitals': hospitals.map((e) => e.toJson()).toList(),
       'trace_logs': traceLogs.map((e) => e.toJson()).toList(),
